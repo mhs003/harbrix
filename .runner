@@ -5,7 +5,7 @@ harbrixd:
     {{CMD}} run ./cmd/harbrixd/main.go
 
 harbrix:
-    {{CMD}} run ./cmd/harbrix/main.go
+    {{CMD}} run ./cmd/harbrix/main.go {{1}}
 
 test1:
     {{CMD}} run ./tests/test_client1.go
