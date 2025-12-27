@@ -1,6 +1,11 @@
 package daemon
 
-import "net"
+import (
+	"log"
+	"net"
+
+	"github.com/mhs003/harbrix/internal/protocol"
+)
 
 func (d *Daemon) Run() error {
 	for {
@@ -18,7 +23,25 @@ func (d *Daemon) Run() error {
 
 func (d *Daemon) handleConn(conn net.Conn) {
 	defer conn.Close()
-	// TODO: handle ipc connection here
+	req, err := protocol.DecodeRequest(conn)
+	if err != nil {
+		log.Printf("decode error: %v", err)
+		protocol.EncodeResponse(conn, &protocol.Response{
+			Ok:    false,
+			Error: "invalid request",
+		})
+		return
+	}
+
+	log.Printf("received request: cmd=%s service=%s", req.Cmd, req.Service)
+
+	resp := &protocol.Response{
+		Ok:   true,
+		Data: map[string]any{"echo": req.Cmd},
+	}
+	if err := protocol.EncodeResponse(conn, resp); err != nil {
+		log.Printf("encode error: %v", err)
+	}
 }
 
 func (d *Daemon) isShuttingDown() bool {
