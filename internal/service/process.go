@@ -35,6 +35,10 @@ func (s *State) Start(paths *paths.Paths) error {
 	s.Running = true
 	s.PID = cmd.Process.Pid
 	s.Cmd = cmd
+	s.StopReq = false
+
+	go s.wait(paths)
+
 	return nil
 }
 
@@ -42,11 +46,44 @@ func (s *State) Stop() error {
 	if !s.Running || s.Cmd == nil {
 		return errors.New("service not running")
 	}
+
+	s.StopReq = true
+
 	if err := s.Cmd.Process.Kill(); err != nil {
 		return err
 	}
+
+	// s.Running = false
+	// s.PID = 0
+	s.Cmd = nil
+
+	return nil
+}
+
+func (s *State) wait(paths *paths.Paths) {
+	err := s.Cmd.Wait()
+
 	s.Running = false
 	s.PID = 0
-	s.Cmd = nil
-	return nil
+
+	exitCode := 0
+	if err != nil {
+		if ee, ok := err.(*exec.ExitError); ok {
+			exitCode = ee.ExitCode()
+		}
+	}
+	s.ExitCode = exitCode
+
+	if s.StopReq {
+		return
+	}
+
+	switch s.Config.Service.Restart {
+	case "always":
+		s.Start(paths)
+	case "on-failure":
+		if exitCode != 0 {
+			s.Start(paths)
+		}
+	}
 }

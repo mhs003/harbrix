@@ -39,17 +39,18 @@ func main() {
 	resp = sendRequest(p, &protocol.Request{Cmd: "start", Service: "test"})
 	fmt.Printf("%+v\n", resp)
 
-	time.Sleep(1 * time.Second)
+	for i := 1; i <= 20; i++ {
+		time.Sleep(time.Second / 4)
+		fmt.Println("=== LIST services ===")
+		resp = sendRequest(p, &protocol.Request{Cmd: "list"})
+		fmt.Printf("%+v\n", resp)
+	}
 
-	fmt.Println("=== LIST services ===")
-	resp = sendRequest(p, &protocol.Request{Cmd: "list"})
-	fmt.Printf("%+v\n", resp)
+	// fmt.Println("=== STOP 'test' ===")
+	// resp = sendRequest(p, &protocol.Request{Cmd: "stop", Service: "test"})
+	// fmt.Printf("%+v\n", resp)
 
-	fmt.Println("=== STOP 'test' ===")
-	resp = sendRequest(p, &protocol.Request{Cmd: "stop", Service: "test"})
-	fmt.Printf("%+v\n", resp)
-
-	fmt.Println("=== LIST services ===")
-	resp = sendRequest(p, &protocol.Request{Cmd: "list"})
-	fmt.Printf("%+v\n", resp)
+	// fmt.Println("=== LIST services ===")
+	// resp = sendRequest(p, &protocol.Request{Cmd: "list"})
+	// fmt.Printf("%+v\n", resp)
 }

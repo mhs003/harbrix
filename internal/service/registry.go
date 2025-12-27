@@ -7,10 +7,12 @@ import (
 )
 
 type State struct {
-	Config  *Config
-	Running bool
-	PID     int
-	Cmd     *exec.Cmd
+	Config   *Config
+	Running  bool
+	PID      int
+	Cmd      *exec.Cmd
+	ExitCode int
+	StopReq  bool // manual stop requested ; used to prevent auto restart on user stop
 }
 
 type Registry struct {
