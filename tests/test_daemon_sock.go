@@ -15,7 +15,7 @@ func main() {
 	defer conn.Close()
 
 	req := &protocol.Request{
-		Cmd: "test",
+		Cmd: "list",
 	}
 	json.NewEncoder(conn).Encode(req)
 

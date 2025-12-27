@@ -24,6 +24,10 @@ func main() {
 		log.Fatalf("daemon init failed: %v", err)
 	}
 
+	if err := d.LoadServices(); err != nil {
+		log.Fatalf("failed loading services: %v", err)
+	}
+
 	if err := d.Run(); err != nil {
 		log.Printf("daemon stopped: %v", err)
 		os.Exit(1)

@@ -35,10 +35,7 @@ func (d *Daemon) handleConn(conn net.Conn) {
 
 	log.Printf("received request: cmd=%s service=%s", req.Cmd, req.Service)
 
-	resp := &protocol.Response{
-		Ok:   true,
-		Data: map[string]any{"echo": req.Cmd},
-	}
+	resp := d.Dispatch(req)
 	if err := protocol.EncodeResponse(conn, resp); err != nil {
 		log.Printf("encode error: %v", err)
 	}
