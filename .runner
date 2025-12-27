@@ -1,0 +1,11 @@
+@vars:
+    CMD=go
+
+harbrixd:
+    {{CMD}} run ./cmd/harbrixd/main.go
+
+harbrix:
+    {{CMD}} run ./cmd/harbrix/main.go
+
+test1:
+    {{CMD}} run ./tests/test_client1.go

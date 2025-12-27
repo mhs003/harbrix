@@ -1,7 +1,6 @@
 package daemon
 
 import (
-	"log"
 	"net"
 	"os"
 	"path/filepath"
@@ -65,8 +64,13 @@ func (d *Daemon) LoadServices() error {
 	return nil
 }
 
+// the dispatcher
 func (d *Daemon) Dispatch(req *protocol.Request) *protocol.Response {
 	switch req.Cmd {
+	case "start":
+		return d.handleStart(req.Service)
+	case "stop":
+		return d.handleStop(req.Service)
 	case "list":
 		return d.handleList()
 	default:
@@ -75,30 +79,4 @@ func (d *Daemon) Dispatch(req *protocol.Request) *protocol.Response {
 			Error: "unknown command",
 		}
 	}
-}
-
-func (d *Daemon) handleList() *protocol.Response {
-	services := d.registry.List()
-
-	data := make(map[string]any)
-	svcList := make([]map[string]any, 0, len(services))
-	for _, s := range services {
-		svcList = append(svcList, map[string]any{
-			"name":        s.Config.Name,
-			"description": s.Config.Description,
-			"author":      s.Config.Author,
-			"running":     s.Running,
-			"pid":         s.PID,
-		})
-	}
-	data["services"] = svcList
-
-	response := &protocol.Response{
-		Ok:   true,
-		Data: data,
-	}
-
-	log.Printf("responding: %+v", response)
-
-	return response
 }

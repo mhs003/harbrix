@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"os/exec"
 	"sync"
 )
 
@@ -9,6 +10,7 @@ type State struct {
 	Config  *Config
 	Running bool
 	PID     int
+	Cmd     *exec.Cmd
 }
 
 type Registry struct {
@@ -43,4 +45,10 @@ func (r *Registry) List() []*State {
 	}
 
 	return list
+}
+
+func (r *Registry) Get(name string) *State {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.services[name]
 }

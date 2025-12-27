@@ -39,8 +39,12 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, errors.New("service.command cannot be empty")
 	}
 
+	if cfg.Service.Restart == "" {
+		cfg.Service.Restart = "never"
+	}
+
 	switch cfg.Service.Restart {
-	case "", "never", "on-failure", "always":
+	case "never", "on-failure", "always":
 	default:
 		return nil, errors.New("invalid restart policy")
 	}
