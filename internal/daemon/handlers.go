@@ -2,6 +2,8 @@ package daemon
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/mhs003/harbrix/internal/protocol"
 )
@@ -61,6 +63,35 @@ func (d *Daemon) handleStop(name string) *protocol.Response {
 
 func (d *Daemon) handleReload() *protocol.Response {
 	if err := d.ReloadServices(); err != nil {
+		return &protocol.Response{Ok: false, Error: err.Error()}
+	}
+	return &protocol.Response{Ok: true}
+}
+
+func (d *Daemon) handleEnable(name string) *protocol.Response {
+	s := d.registry.Get(name)
+	if s == nil {
+		return &protocol.Response{Ok: false, Error: "service not found"}
+	}
+
+	path := filepath.Join(d.paths.EnabledServices, name)
+	if err := os.WriteFile(path, []byte{}, 0o644); err != nil {
+		return &protocol.Response{Ok: false, Error: err.Error()}
+	}
+
+	return &protocol.Response{Ok: true}
+}
+
+func (d *Daemon) handleDisable(name string) *protocol.Response {
+	path := filepath.Join(d.paths.EnabledServices, name)
+	os.Remove(path)
+	return &protocol.Response{Ok: true}
+}
+
+func (d *Daemon) handleIsEnabled(name string) *protocol.Response {
+	path := filepath.Join(d.paths.EnabledServices, name)
+	_, err := os.Stat(path)
+	if err != nil {
 		return &protocol.Response{Ok: false, Error: err.Error()}
 	}
 	return &protocol.Response{Ok: true}

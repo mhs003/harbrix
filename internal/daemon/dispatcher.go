@@ -13,6 +13,12 @@ func (d *Daemon) Dispatch(req *protocol.Request) *protocol.Response {
 		return d.handleList()
 	case "reload-daemon":
 		return d.handleReload()
+	case "enable":
+		return d.handleEnable(req.Service)
+	case "disable":
+		return d.handleDisable(req.Service)
+	case "is-enabled":
+		return d.handleIsEnabled(req.Service)
 	default:
 		return &protocol.Response{
 			Ok:    false,

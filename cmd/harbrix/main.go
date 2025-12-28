@@ -6,6 +6,8 @@ import (
 	"io"
 	"net"
 	"os"
+	"os/exec"
+	"os/user"
 	"path/filepath"
 	"time"
 
@@ -101,6 +103,36 @@ func main() {
 		showLog(arg, follow)
 	case "reload-daemon":
 		send("reload-daemon", "")
+	case "enable":
+		if arg == "" {
+			fatal("service name is required")
+		}
+		send("enable", arg)
+		if len(os.Args) > 3 && os.Args[3] == "--now" {
+			send("start", arg)
+		}
+	case "disable", "is-enabled":
+		if arg == "" {
+			fatal("service name is required")
+		}
+		resp := send(cmd, arg)
+
+		if cmd == "is-enabled" {
+			if resp.Ok {
+				os.Exit(0)
+			}
+			os.Exit(1)
+		}
+	case "new":
+		if arg == "" {
+			fatal("service name is required")
+		}
+		createService(arg)
+	case "edit":
+		if arg == "" {
+			fatal("service name is required")
+		}
+		editService(arg)
 	default:
 		fatal(fmt.Sprintf("unknown command %+v", os.Args))
 	}
@@ -136,5 +168,68 @@ func showLog(name string, follow bool) {
 		if err != nil {
 			time.Sleep(300 * time.Millisecond)
 		}
+	}
+}
+
+func createService(name string) {
+	p, err := paths.New()
+	if err != nil {
+		fatal(err.Error())
+	}
+
+	path := filepath.Join(p.Services, name+".toml")
+
+	if _, err := os.Stat(path); err == nil {
+		fatal("service already exists.")
+	}
+
+	username := ""
+	if u, err := user.Current(); err == nil {
+		username = u.Username
+	}
+
+	template := fmt.Sprintf(`# %s service
+
+name="%s"
+description=""
+auth="%s"
+
+[service]
+command=""
+workdir=""
+restart="never"
+`, name, name, username)
+
+	if err := os.WriteFile(path, []byte(template), 0o644); err != nil {
+		fatal(err.Error())
+	}
+
+	fmt.Println("created:", path)
+}
+
+func editService(name string) {
+	p, err := paths.New()
+	if err != nil {
+		fatal(err.Error())
+	}
+
+	path := filepath.Join(p.Services, name+".toml")
+
+	if _, err := os.Stat(path); err != nil {
+		fatal("service not found")
+	}
+
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		editor = "vi"
+	}
+
+	cmd := exec.Command(editor, path)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		fatal(err.Error())
 	}
 }
