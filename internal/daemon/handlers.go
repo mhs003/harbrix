@@ -62,6 +62,20 @@ func (d *Daemon) handleStop(name string) *protocol.Response {
 	return &protocol.Response{Ok: true}
 }
 
+// func (d *Daemon) handleRestart(name string) *protocol.Response {
+// 	s := d.registry.Get(name)
+// 	if s == nil {
+// 		return &protocol.Response{Ok: false, Error: "service not found"}
+// 	}
+// 	if err := s.Stop(); err != nil {
+// 		return &protocol.Response{Ok: false, Error: err.Error()}
+// 	}
+// 	if err := s.Start(d.paths); err != nil {
+// 		return &protocol.Response{Ok: false, Error: err.Error()}
+// 	}
+// 	return &protocol.Response{Ok: true}
+// }
+
 func (d *Daemon) handleReload() *protocol.Response {
 	if err := d.ReloadServices(); err != nil {
 		return &protocol.Response{Ok: false, Error: err.Error()}
@@ -98,7 +112,7 @@ func (d *Daemon) handleIsEnabled(name string) *protocol.Response {
 	path := filepath.Join(d.paths.EnabledServices, name)
 	_, err := os.Stat(path)
 	if err != nil {
-		return &protocol.Response{Ok: false, Error: err.Error()}
+		return &protocol.Response{Ok: false}
 	}
 	return &protocol.Response{Ok: true}
 }

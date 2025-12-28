@@ -15,6 +15,13 @@ import (
 	"github.com/mhs003/harbrix/internal/protocol"
 )
 
+var bold = "\033[1m"
+var green = "\033[32m"
+var red = "\033[31m"
+var yellow = "\033[33m"
+var blue = "\033[34m"
+var reset = "\033[0m"
+
 func send(cmd, service string) *protocol.Response {
 	p, err := paths.New()
 	if err != nil {
@@ -41,15 +48,12 @@ func send(cmd, service string) *protocol.Response {
 	}
 
 	if !resp.Ok {
-		Fatal(resp.Error)
+		if resp.Error != "" {
+			Fatal(resp.Error)
+		}
 	}
 
 	return &resp
-}
-
-func Fatal(msg string) {
-	fmt.Fprintln(os.Stderr, "error:", msg)
-	os.Exit(1)
 }
 
 func requireArg(args []string) {
@@ -124,7 +128,7 @@ restart="never"
 		Fatal(err.Error())
 	}
 
-	fmt.Println("created:", path)
+	Success(fmt.Sprintf("created: %s", path))
 }
 
 func editService(name string) {
@@ -152,4 +156,24 @@ func editService(name string) {
 	if err := cmd.Run(); err != nil {
 		Fatal(err.Error())
 	}
+}
+
+func Fatal(msg string) {
+	fmt.Fprintf(os.Stderr, "%s%s%s%s\n", bold, red, msg, reset)
+	os.Exit(1)
+}
+
+func Success(msg string) {
+	fmt.Fprintf(os.Stdout, "%s%s%s%s\n", bold, green, msg, reset)
+	os.Exit(0)
+}
+
+func Info(msg string) {
+	fmt.Fprintf(os.Stdout, "%s%s%s%s\n", bold, blue, msg, reset)
+	os.Exit(0)
+}
+
+func Warning(msg string) {
+	fmt.Fprintf(os.Stdout, "%s%s%s%s\n", bold, yellow, msg, reset)
+	os.Exit(0)
 }

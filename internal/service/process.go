@@ -53,9 +53,9 @@ func (s *State) Stop() error {
 		return err
 	}
 
-	// s.Running = false
-	// s.PID = 0
 	s.Cmd = nil
+	s.Running = false
+	s.PID = 0
 
 	return nil
 }

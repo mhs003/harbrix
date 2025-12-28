@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/mhs003/harbrix/internal/paths"
@@ -11,13 +10,6 @@ import (
 func CmdList(_ []string) {
 	resp := send("list", "")
 	services := resp.Data["services"].([]any)
-
-	bold := "\033[1m"
-	green := "\033[32m"
-	red := "\033[31m"
-	// yellow := "\033[33m"
-	blue := "\033[34m"
-	reset := "\033[0m"
 
 	fmt.Printf("%s%-15s %-25s %-10s%s\n", bold, "SERVICE", "STATUS", "ENABLED", reset)
 	fmt.Println("-----------------------------------------------------------")
@@ -51,22 +43,26 @@ func CmdList(_ []string) {
 
 func CmdReloadDaemon(args []string) {
 	send("reload-daemon", "")
+	Success("Daemon reloaded.")
 }
 
 func CmdStart(args []string) {
 	requireArg(args)
 	send("start", args[0])
+	Info("Service started.")
 }
 
 func CmdStop(args []string) {
 	requireArg(args)
 	send("stop", args[0])
+	Info("Service stopped.")
 }
 
 func CmdRestart(args []string) {
 	requireArg(args)
 	send("stop", args[0])
 	send("start", args[0])
+	Info("Service restarted.")
 }
 
 func CmdLog(args []string) {
@@ -94,21 +90,25 @@ func CmdEnable(args []string) {
 
 	if len(args) > 1 && args[1] == "--now" {
 		send("start", args[0])
+		Info("Service enabled and started.")
+	} else {
+		Info("Service enabled.")
 	}
 }
 
 func CmdDisable(args []string) {
 	requireArg(args)
 	send("disable", args[0])
+	Info("Service disabled.")
 }
 
 func CmdIsEnabled(args []string) {
 	requireArg(args)
 	resp := send("is-enabled", args[0])
 	if resp.Ok {
-		os.Exit(0)
+		Warning("Service is disabled")
 	}
-	os.Exit(1)
+	Info("Service is enabled")
 }
 
 func CmdNew(args []string) {
@@ -144,14 +144,6 @@ func CmdStatus(args []string) {
 			enabled := s["enabled"].(bool)
 
 			file_path := filepath.Join(p.Services, name+".toml")
-
-			// ANSI colors
-			bold := "\033[1m"
-			green := "\033[32m"
-			red := "\033[31m"
-			yellow := "\033[33m"
-			blue := "\033[34m"
-			reset := "\033[0m"
 
 			fmt.Printf("%sDaemon information and status%s\n", bold, reset)
 			fmt.Printf("  %sService:%s %s\n", yellow, reset, name)
