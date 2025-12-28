@@ -58,3 +58,10 @@ func (d *Daemon) handleStop(name string) *protocol.Response {
 
 	return &protocol.Response{Ok: true}
 }
+
+func (d *Daemon) handleReload() *protocol.Response {
+	if err := d.ReloadServices(); err != nil {
+		return &protocol.Response{Ok: false, Error: err.Error()}
+	}
+	return &protocol.Response{Ok: true}
+}

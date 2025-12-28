@@ -6,12 +6,13 @@ import (
 )
 
 type Paths struct {
-	Root        string
-	Services    string
-	Logs        string
-	ServiceLogs string
-	State       string
-	Socket      string
+	Root            string
+	Services        string
+	Logs            string
+	ServiceLogs     string
+	State           string
+	EnabledServices string
+	Socket          string
 }
 
 func New() (*Paths, error) {
@@ -23,12 +24,13 @@ func New() (*Paths, error) {
 	root := filepath.Join(home, ".local", "share", "harbrix")
 
 	return &Paths{
-		Root:        root,
-		Services:    filepath.Join(root, "services"),
-		Logs:        filepath.Join(root, "logs"),
-		ServiceLogs: filepath.Join(root, "logs", "services"),
-		State:       filepath.Join(root, "state"),
-		Socket:      filepath.Join(root, "control.sock"),
+		Root:            root,
+		Services:        filepath.Join(root, "services"),
+		Logs:            filepath.Join(root, "logs"),
+		ServiceLogs:     filepath.Join(root, "logs", "services"),
+		State:           filepath.Join(root, "state"),
+		EnabledServices: filepath.Join(root, "enabled"),
+		Socket:          filepath.Join(root, "control.sock"),
 	}, nil
 }
 
@@ -39,6 +41,7 @@ func (p *Paths) Ensure() error {
 		p.Logs,
 		p.ServiceLogs,
 		p.State,
+		p.EnabledServices,
 	}
 
 	for _, dir := range dirs {

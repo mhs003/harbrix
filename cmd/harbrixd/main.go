@@ -28,6 +28,8 @@ func main() {
 		log.Fatalf("failed loading services: %v", err)
 	}
 
+	d.StartEnabled()
+
 	if err := d.Run(); err != nil {
 		log.Printf("daemon stopped: %v", err)
 		os.Exit(1)

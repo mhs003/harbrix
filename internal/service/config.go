@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
+	"github.com/mhs003/harbrix/internal/paths"
 )
 
 type Config struct {
@@ -50,4 +51,27 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func LoadConfigsFromDisc(paths *paths.Paths) (map[string]*Config, error) {
+	cfgs := make(map[string]*Config)
+
+	files, err := os.ReadDir(paths.Services)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+		path := filepath.Join(paths.Services, f.Name())
+		cfg, err := LoadConfig(path)
+		if err != nil {
+			return nil, err
+		}
+		cfgs[cfg.Name] = cfg
+	}
+
+	return cfgs, nil
 }

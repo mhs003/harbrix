@@ -3,11 +3,9 @@ package daemon
 import (
 	"net"
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/mhs003/harbrix/internal/paths"
-	"github.com/mhs003/harbrix/internal/protocol"
 	"github.com/mhs003/harbrix/internal/service"
 )
 
@@ -43,40 +41,42 @@ func New(p *paths.Paths) (*Daemon, error) {
 }
 
 func (d *Daemon) LoadServices() error {
-	files, err := os.ReadDir(d.paths.Services)
+	configs, err := service.LoadConfigsFromDisc(d.paths)
 	if err != nil {
-		return nil
+		return err
 	}
 
-	for _, f := range files {
-		if f.IsDir() {
-			continue
-		}
-		path := filepath.Join(d.paths.Services, f.Name())
-		cfg, err := service.LoadConfig(path)
-		if err != nil {
-			// error log here
-			continue
-		}
-		d.registry.Add(&service.State{Config: cfg})
+	for _, cfg := range configs {
+		d.registry.Add(&service.State{
+			Config: cfg,
+		})
 	}
 
 	return nil
 }
 
-// the dispatcher
-func (d *Daemon) Dispatch(req *protocol.Request) *protocol.Response {
-	switch req.Cmd {
-	case "start":
-		return d.handleStart(req.Service)
-	case "stop":
-		return d.handleStop(req.Service)
-	case "list":
-		return d.handleList()
-	default:
-		return &protocol.Response{
-			Ok:    false,
-			Error: "unknown command",
+func (d *Daemon) ReloadServices() error {
+	configs, err := service.LoadConfigsFromDisc(d.paths)
+	if err != nil {
+		return err
+	}
+
+	d.registry.Reload(configs)
+	return nil
+}
+
+func (d *Daemon) StartEnabled() {
+	entries, err := os.ReadDir(d.paths.EnabledServices)
+	if err != nil {
+		return
+	}
+
+	for _, e := range entries {
+		name := e.Name()
+		s := d.registry.Get(name)
+		if s == nil {
+			continue
 		}
+		s.Start(d.paths)
 	}
 }

@@ -54,3 +54,32 @@ func (r *Registry) Get(name string) *State {
 	defer r.mu.Unlock()
 	return r.services[name]
 }
+
+func (r *Registry) Reload(new map[string]*Config) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for name, cfg := range new {
+		s, exists := r.services[name]
+		if !exists {
+			r.services[name] = &State{
+				Config:  cfg,
+				Running: false,
+				PID:     0,
+			}
+			continue
+		}
+
+		if s.Running {
+			continue
+		}
+
+		s.Config = cfg
+	}
+
+	for name, s := range r.services {
+		if _, exists := new[name]; !exists && !s.Running {
+			delete(r.services, name)
+		}
+	}
+}
