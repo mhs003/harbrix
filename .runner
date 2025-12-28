@@ -1,5 +1,11 @@
 @vars:
     CMD=go
+    BUILD_DIR=build
+
+build:
+    mkdir -p {{BUILD_DIR}}/
+    {{CMD}} {{BUILD_DIR}} -o {{BUILD_DIR}}/harbrix ./cmd/harbrix/main.go
+    {{CMD}} {{BUILD_DIR}} -o {{BUILD_DIR}}/harbrixd ./cmd/harbrixd/main.go
 
 harbrixd:
     {{CMD}} run ./cmd/harbrixd/main.go

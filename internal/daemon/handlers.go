@@ -20,7 +20,8 @@ func (d *Daemon) handleList() *protocol.Response {
 			"author":      s.Config.Author,
 			"running":     s.Running,
 			"pid":         s.PID,
-			// "cmd":         fmt.Sprintf("%+v", s.Cmd),
+			"enabled":     s.IsEnabled,
+			// "cmd":         fmt.Sprintf("%+v", s.Cmd.),
 		})
 	}
 	data["services"] = svcList
@@ -79,12 +80,17 @@ func (d *Daemon) handleEnable(name string) *protocol.Response {
 		return &protocol.Response{Ok: false, Error: err.Error()}
 	}
 
+	s.IsEnabled = true
+
 	return &protocol.Response{Ok: true}
 }
 
 func (d *Daemon) handleDisable(name string) *protocol.Response {
 	path := filepath.Join(d.paths.EnabledServices, name)
 	os.Remove(path)
+	if s := d.registry.Get(name); s != nil {
+		s.IsEnabled = false
+	}
 	return &protocol.Response{Ok: true}
 }
 

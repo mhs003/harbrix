@@ -74,6 +74,7 @@ func (d *Daemon) StartEnabled() {
 	for _, e := range entries {
 		name := e.Name()
 		s := d.registry.Get(name)
+		s.IsEnabled = true
 		if s == nil {
 			continue
 		}
