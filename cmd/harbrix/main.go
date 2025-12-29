@@ -115,10 +115,10 @@ func printHelp() {
 	fmt.Println("Commands:")
 
 	for _, c := range commands {
-		line := fmt.Sprintf("  %-14s", c.Name)
+		line := fmt.Sprintf("  %-15s", c.Name)
 		if c.Args != "" {
 			line += " " + c.Args
 		}
-		fmt.Printf("%-30s	%s\n", line, c.Desc)
+		fmt.Printf("%-32s	%s\n", line, c.Desc)
 	}
 }

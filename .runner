@@ -15,3 +15,6 @@ harbrix:
 
 test1:
     {{CMD}} run ./tests/test_client1.go
+
+mkduser:
+    sudo useradd --system --no-create-home --shell /usr/sbin/nologin harbrix

@@ -21,6 +21,10 @@ func New() (*Paths, error) {
 		return nil, err
 	}
 
+	return NewForHome(home), nil
+}
+
+func NewForHome(home string) *Paths {
 	root := filepath.Join(home, ".local", "share", "harbrix")
 
 	return &Paths{
@@ -31,7 +35,7 @@ func New() (*Paths, error) {
 		State:           filepath.Join(root, "state"),
 		EnabledServices: filepath.Join(root, "enabled"),
 		Socket:          filepath.Join(root, "control.sock"),
-	}, nil
+	}
 }
 
 func (p *Paths) Ensure() error {
