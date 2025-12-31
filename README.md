@@ -148,4 +148,4 @@ harbrix log myservice
 
 ## License
 
-GPL-3.0 (see [LICENSE](https://github.com/mhs003/harbrix/blob/main/LICENSE) file)
+MIT (see [LICENSE](https://github.com/mhs003/harbrix/blob/main/LICENSE) file)
