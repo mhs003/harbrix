@@ -91,10 +91,19 @@ var commands = []Command{
 		Desc: "Show status of a service",
 		Run:  cli.CmdStatus,
 	},
+	{
+		Name: "help",
+		Desc: "Show this help document",
+	},
 }
 
 func main() {
 	if len(os.Args) < 2 {
+		printHelp()
+		os.Exit(1)
+	}
+
+	if os.Args[1] == "help" {
 		printHelp()
 		os.Exit(1)
 	}
@@ -113,7 +122,7 @@ func main() {
 }
 
 func printHelp() {
-	fmt.Println("harbrix - service manager")
+	fmt.Println("harbrix - service supervisor")
 	fmt.Println()
 	fmt.Println("Usage:")
 	fmt.Println("  harbrix <command> [options]")

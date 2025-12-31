@@ -180,3 +180,7 @@ func CmdStatus(args []string) {
 		fmt.Printf("%sService %s not found.%s\n", red, name, reset)
 	}
 }
+
+func ShowHelp() {
+
+}

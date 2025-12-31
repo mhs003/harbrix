@@ -19,9 +19,5 @@ test1:
 mkduser:
     sudo useradd --system --no-create-home --shell /usr/sbin/nologin harbrix
 
-setup:
-    sudo mkdir -p /run/harbrix
-    sudo chown root:root /run/harbrix
-
 cpb:
     sudo cp build/* /usr/local/bin/
