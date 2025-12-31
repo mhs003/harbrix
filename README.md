@@ -146,6 +146,15 @@ harbrix log myservice
     That said, it hasn't undergone extensive third-party testing, so you can use it at your own discretion if you want to.
 </details>
 
+## TODO
+
+- [ ] Service restart limitation
+- [ ] Restart delay time
+- [ ] Environment variables in service files
+- [ ] Better TUI
+
+*this is it, nothing else*
+
 ## License
 
 MIT (see [LICENSE](https://github.com/mhs003/harbrix/blob/main/LICENSE) file)
