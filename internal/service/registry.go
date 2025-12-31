@@ -14,6 +14,8 @@ type State struct {
 	ExitCode  int
 	StopReq   bool // manual stop requested ; used to prevent auto restart on user stop
 	IsEnabled bool
+	UID       int
+	GID       int
 }
 
 type Registry struct {
@@ -55,8 +57,6 @@ func (r *Registry) Get(name string) *State {
 	defer r.mu.Unlock()
 	return r.services[name]
 }
-
-// func (r *Registry) Update(name string, )
 
 func (r *Registry) Reload(new map[string]*Config) {
 	r.mu.Lock()

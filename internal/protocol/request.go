@@ -6,9 +6,10 @@ import (
 )
 
 type Request struct {
-	Cmd     string         `json:"cmd"`
-	Service string         `json:"service,omitempty"`
-	Args    map[string]any `json:"args"`
+	Cmd     string            `json:"cmd"`
+	Service string            `json:"service,omitempty"`
+	Args    map[string]any    `json:"args"`
+	Env     map[string]string `json:"env"`
 }
 
 func DecodeRequest(r io.Reader) (*Request, error) {

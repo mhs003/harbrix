@@ -4,6 +4,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/mhs003/harbrix/internal/paths"
 )
 
 func (d *Daemon) InitSignals() {
@@ -22,5 +24,5 @@ func (d *Daemon) Shutdown() {
 	d.mu.Unlock()
 
 	d.listener.Close()
-	_ = os.Remove(d.paths.Socket)
+	_ = os.Remove(paths.SocketPath)
 }

@@ -12,8 +12,11 @@ type Paths struct {
 	ServiceLogs     string
 	State           string
 	EnabledServices string
-	Socket          string
+	// Socket          string
 }
+
+const InternalDir = "/run/harbrix"
+const SocketPath = InternalDir + "/control.sock"
 
 func New() (*Paths, error) {
 	home, err := os.UserHomeDir()
@@ -34,11 +37,17 @@ func NewForHome(home string) *Paths {
 		ServiceLogs:     filepath.Join(root, "logs", "services"),
 		State:           filepath.Join(root, "state"),
 		EnabledServices: filepath.Join(root, "enabled"),
-		Socket:          filepath.Join(root, "control.sock"),
 	}
 }
 
-func (p *Paths) Ensure() error {
+func EnsureInternalDir() error {
+	if err := os.MkdirAll(InternalDir, 0o755); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *Paths) Ensure(uid int, gid int) error {
 	dirs := []string{
 		p.Root,
 		p.Services,
@@ -50,6 +59,9 @@ func (p *Paths) Ensure() error {
 
 	for _, dir := range dirs {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return err
+		}
+		if err := os.Chown(dir, uid, gid); err != nil {
 			return err
 		}
 	}

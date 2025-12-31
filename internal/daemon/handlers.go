@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
@@ -36,6 +37,30 @@ func (d *Daemon) handleList() *protocol.Response {
 	return response
 }
 
+func (d *Daemon) handleDelete(name string) (*protocol.Response, error) {
+	s := d.registry.Get(name)
+	if s == nil {
+		return &protocol.Response{Ok: true, Error: "Service not available"}, errors.New("")
+	}
+	if s.IsEnabled {
+		return &protocol.Response{Ok: false, Error: "Can't delete enabled service."}, errors.New("")
+	}
+	if s.Running {
+		return &protocol.Response{Ok: false, Error: "Can't delete service, the service is currently running."}, errors.New("")
+	}
+	path := filepath.Join(d.paths.Services, name+".toml")
+	if err := os.Remove(path); err != nil {
+		return &protocol.Response{
+			Ok:    false,
+			Error: err.Error(),
+		}, errors.New("")
+	}
+	return &protocol.Response{
+		Ok:    true,
+		Error: "Service deleted successfully",
+	}, nil
+}
+
 func (d *Daemon) handleStart(name string) *protocol.Response {
 	s := d.registry.Get(name)
 	if s == nil {
@@ -62,22 +87,8 @@ func (d *Daemon) handleStop(name string) *protocol.Response {
 	return &protocol.Response{Ok: true}
 }
 
-// func (d *Daemon) handleRestart(name string) *protocol.Response {
-// 	s := d.registry.Get(name)
-// 	if s == nil {
-// 		return &protocol.Response{Ok: false, Error: "service not found"}
-// 	}
-// 	if err := s.Stop(); err != nil {
-// 		return &protocol.Response{Ok: false, Error: err.Error()}
-// 	}
-// 	if err := s.Start(d.paths); err != nil {
-// 		return &protocol.Response{Ok: false, Error: err.Error()}
-// 	}
-// 	return &protocol.Response{Ok: true}
-// }
-
-func (d *Daemon) handleReload() *protocol.Response {
-	if err := d.ReloadServices(); err != nil {
+func (d *Daemon) handleReload(uc *UserContext) *protocol.Response {
+	if err := d.ReloadUser(uc); err != nil {
 		return &protocol.Response{Ok: false, Error: err.Error()}
 	}
 	return &protocol.Response{Ok: true}
@@ -92,6 +103,10 @@ func (d *Daemon) handleEnable(name string) *protocol.Response {
 	path := filepath.Join(d.paths.EnabledServices, name)
 	if err := os.WriteFile(path, []byte{}, 0o644); err != nil {
 		return &protocol.Response{Ok: false, Error: err.Error()}
+	}
+
+	if err := os.Chown(path, s.UID, s.GID); err != nil {
+		log.Printf("chown failed for %s: %v", path, err)
 	}
 
 	s.IsEnabled = true

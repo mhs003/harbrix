@@ -75,6 +75,12 @@ var commands = []Command{
 		Run:  cli.CmdEdit,
 	},
 	{
+		Name: "delete",
+		Args: "<service>",
+		Desc: "Delete a service if it is not enabled and running",
+		Run:  cli.CmdDelete,
+	},
+	{
 		Name: "reload-daemon",
 		Desc: "Reload daemon service files",
 		Run:  cli.CmdReloadDaemon,

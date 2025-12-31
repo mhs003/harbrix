@@ -1,8 +1,0 @@
-name = "test"
-description = "this is a test service"
-author = "me"
-
-[service]
-command = "sleep 5"
-workdir = "/tmp"
-restart = "always"

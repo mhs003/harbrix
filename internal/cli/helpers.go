@@ -23,20 +23,19 @@ var blue = "\033[34m"
 var reset = "\033[0m"
 
 func send(cmd, service string) *protocol.Response {
-	p, err := paths.New()
+	conn, err := net.Dial("unix", paths.SocketPath)
 	if err != nil {
-		Fatal(err.Error())
-	}
-
-	conn, err := net.Dial("unix", p.Socket)
-	if err != nil {
-		Fatal("daemon not running")
+		Fatal(fmt.Sprintf("daemon connection failure: %s", err.Error()))
 	}
 	defer conn.Close()
 
 	req := &protocol.Request{
 		Cmd:     cmd,
 		Service: service,
+		Env: map[string]string{
+			"HOME": os.Getenv("HOME"),
+			"USER": os.Getenv("USER"),
+		},
 	}
 	if err := json.NewEncoder(conn).Encode(req); err != nil {
 		Fatal(err.Error())
@@ -112,6 +111,11 @@ func createService(name string) {
 		username = u.Username
 	}
 
+	homedir := os.Getenv("HOME")
+	if homedir == "" {
+		homedir = "/tmp"
+	}
+
 	template := fmt.Sprintf(`# %s service
 
 name="%s"
@@ -120,15 +124,35 @@ auth="%s"
 
 [service]
 command=""
-workdir=""
+workdir="%s"
 restart="never"
-`, name, name, username)
+log=false
+`, name, name, username, homedir)
 
 	if err := os.WriteFile(path, []byte(template), 0o644); err != nil {
 		Fatal(err.Error())
 	}
 
 	Success(fmt.Sprintf("created: %s", path))
+}
+
+func pickEditor() string {
+	candidates := []string{}
+
+	if e := os.Getenv("EDITOR"); e != "" {
+		candidates = append(candidates, e)
+	}
+
+	candidates = append(candidates, "vi", "vim", "nano")
+
+	for _, editor := range candidates {
+		if _, err := exec.LookPath(editor); err == nil {
+			return editor
+		}
+	}
+
+	Fatal("no editor found (try assigning $EDITOR, or install any of these editors: vi, vim, nano)")
+	return ""
 }
 
 func editService(name string) {
@@ -143,10 +167,7 @@ func editService(name string) {
 		Fatal("service not found")
 	}
 
-	editor := os.Getenv("EDITOR")
-	if editor == "" {
-		editor = "vi" // falling back to `vi`
-	}
+	editor := pickEditor()
 
 	cmd := exec.Command(editor, path)
 	cmd.Stdin = os.Stdin

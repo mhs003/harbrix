@@ -3,6 +3,7 @@ package daemon
 import (
 	"log"
 	"net"
+	"syscall"
 
 	"github.com/mhs003/harbrix/internal/protocol"
 )
@@ -33,9 +34,64 @@ func (d *Daemon) handleConn(conn net.Conn) {
 		return
 	}
 
-	log.Printf("received request: cmd=%s service=%s", req.Cmd, req.Service)
+	uconn, ok := conn.(*net.UnixConn)
+	if !ok {
+		protocol.EncodeResponse(conn, &protocol.Response{
+			Ok:    false,
+			Error: "invalid connection",
+		})
+		return
+	}
+	f, err := uconn.File()
+	if err != nil {
+		protocol.EncodeResponse(conn, &protocol.Response{
+			Ok:    false,
+			Error: "failed to get connection file",
+		})
+		return
+	}
+	defer f.Close()
 
-	resp := d.Dispatch(req)
+	ucred, err := syscall.GetsockoptUcred(int(f.Fd()), syscall.SOL_SOCKET, syscall.SO_PEERCRED)
+	if err != nil {
+		protocol.EncodeResponse(conn, &protocol.Response{
+			Ok:    false,
+			Error: "failed to get peer credential",
+		})
+		return
+	}
+
+	callerID := int(ucred.Uid)
+
+	var uc *UserContext
+	for _, uctx := range d.users {
+		if uctx.User.UID == callerID {
+			uc = uctx
+			break
+		}
+	}
+	if uc == nil {
+		protocol.EncodeResponse(conn, &protocol.Response{
+			Ok:    false,
+			Error: "unauthorized user",
+		})
+		return
+	}
+
+	if req.Env == nil || req.Env["USER"] != uc.User.Name || req.Env["HOME"] != uc.User.Home {
+		protocol.EncodeResponse(conn, &protocol.Response{
+			Ok:    false,
+			Error: "invalid environment",
+		})
+		return
+	}
+
+	d.paths = uc.Paths
+	d.registry = uc.Registry
+
+	log.Printf("received request from %s: cmd=%s service=%s", uc.User.Name, req.Cmd, req.Service)
+
+	resp := d.Dispatch(req, uc)
 	if err := protocol.EncodeResponse(conn, resp); err != nil {
 		log.Printf("encode error: %v", err)
 	}

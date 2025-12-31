@@ -106,9 +106,9 @@ func CmdIsEnabled(args []string) {
 	requireArg(args)
 	resp := send("is-enabled", args[0])
 	if resp.Ok {
-		Warning("Service is disabled")
+		Warning("Service is enabled")
 	}
-	Info("Service is enabled")
+	Info("Service is disabled")
 }
 
 func CmdNew(args []string) {
@@ -119,6 +119,14 @@ func CmdNew(args []string) {
 func CmdEdit(args []string) {
 	requireArg(args)
 	editService(args[0])
+}
+
+func CmdDelete(args []string) {
+	requireArg(args)
+	resp := send("delete", args[0])
+	if resp.Ok {
+		//
+	}
 }
 
 func CmdStatus(args []string) {

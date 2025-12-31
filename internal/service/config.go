@@ -1,7 +1,8 @@
 package service
 
 import (
-	"errors"
+	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -18,36 +19,25 @@ type Config struct {
 		Command string `toml:"command"`
 		Workdir string `toml:"workdir"`
 		Restart string `toml:"restart"`
+		Log     bool   `toml:"log"`
 	} `toml:"service"`
 }
 
 func LoadConfig(path string) (*Config, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, errors.New("service file not found.")
+		log.Printf("no services found at path: %s", path)
+		return nil, fmt.Errorf("no services found at path: %s", path)
 	}
 
 	var cfg Config
 	if _, err := toml.DecodeFile(path, &cfg); err != nil {
+		log.Printf("caught error loading service config: %s", err)
 		return nil, err
 	}
 
 	if filepath.Base(path) != cfg.Name+".toml" {
-		return nil, errors.New("filename must match service name")
-	}
-
-	// basic validation
-	if cfg.Service.Command == "" {
-		return nil, errors.New("service.command cannot be empty")
-	}
-
-	if cfg.Service.Restart == "" {
-		cfg.Service.Restart = "never"
-	}
-
-	switch cfg.Service.Restart {
-	case "never", "on-failure", "always":
-	default:
-		return nil, errors.New("invalid restart policy")
+		log.Printf("filename must match service name for service %s", path)
+		return nil, fmt.Errorf("filename must match service name for service %s", path)
 	}
 
 	return &cfg, nil
@@ -66,10 +56,10 @@ func LoadConfigsFromDisc(paths *paths.Paths) (map[string]*Config, error) {
 			continue
 		}
 		path := filepath.Join(paths.Services, f.Name())
-		cfg, err := LoadConfig(path)
-		if err != nil {
-			return nil, err
-		}
+		cfg, _ := LoadConfig(path)
+		// if err != nil {
+		// 	return nil, err
+		// }
 		cfgs[cfg.Name] = cfg
 	}
 
