@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@4
+
+      - name: Set up GO
+        uses: actions/setup-go@5
+        with:
+          go-version: "1.25.5"
+
+      - name: Build binaries
+        run: make release
+
+      - name: Create github release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          body: |
+            ## Auto-generated release
+
+            ## Install
+            Run the following command in your shell:
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/mhs003/harbrix/main/net-install.sh | sudo bash
+            ```
+          files: build/linux/*

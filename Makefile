@@ -6,7 +6,7 @@ INSTALL   ?= install
 
 VERSION   := $(shell cat version)
 
-.PHONY: all build install uninstall clean run-daemon run-cli list status start stop
+.PHONY: all build install uninstall clean run-daemon run-cli list status start stop release
 
 all: build
 
@@ -15,7 +15,7 @@ build:
 	$(GO) build -trimpath -ldflags="-s -w -X main.version=$(VERSION)" -o build/harbrix ./cmd/harbrix
 	$(GO) build -trimpath -ldflags="-s -w" -o build/harbrixd ./cmd/harbrixd
 	
-build-all:
+release:
 	mkdir -p build/linux
 	GOOS=linux GOARCH=amd64   $(GO) build -trimpath -ldflags="-s -w -X main.version=$(VERSION)" -o build/linux/harbrix-amd64   ./cmd/harbrix
 	GOOS=linux GOARCH=amd64   $(GO) build -trimpath -ldflags="-s -w" -o build/linux/harbrixd-amd64  ./cmd/harbrixd
