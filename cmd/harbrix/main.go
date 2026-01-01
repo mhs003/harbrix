@@ -14,6 +14,8 @@ type Command struct {
 	Run  func(args []string)
 }
 
+var version = ""
+
 var commands = []Command{
 	{
 		Name: "list",
@@ -98,6 +100,11 @@ var commands = []Command{
 }
 
 func main() {
+	if version == "" {
+		fmt.Fprintln(os.Stderr, "ERROR: version not set. Use -ldflags '-X main.version=...' when building.")
+		os.Exit(2)
+	}
+
 	if len(os.Args) < 2 {
 		printHelp()
 		os.Exit(1)
@@ -136,4 +143,6 @@ func printHelp() {
 		}
 		fmt.Printf("%-32s	%s\n", line, c.Desc)
 	}
+
+	fmt.Printf("version: %s\n", version)
 }

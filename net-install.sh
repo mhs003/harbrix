@@ -17,29 +17,57 @@ error() {
     echo -e "${RED}[ERROR]${NC}   $*" >&2;
 }
 
-if ! command -v go &> /dev/null; then
-    error "Go is not installed or not in PATH. Please install Go first."
+VERSION_FILE="https://raw.githubusercontent.com/mhs003/harbrix/refs/heads/main/version"
+BIN_DIR="/usr/local/bin"
+SERVICE_FILE="/etc/systemd/system/harbrixd.service"
+
+command -v curl >/dev/null 2>&1 || {
+    error "curl is required"
+    exit 1
+}
+
+case "$(uname -m)" in
+    x86_64) ARCH="amd64" ;;
+    aarch64) ARCH="arm64" ;;
+    armv7l|armv6l) ARCH="arm" ;;
+    i386|i686) ARCH="386" ;;
+    *)
+        error "Unsupported architecture: $(uname -m)"
+        exit 1
+        ;;
+esac
+
+info "Detected architecture: $ARCH"
+
+
+info "Fetching latest version..."
+VERSION="$(curl -fsSL "$VERSION_FILE")"
+
+if [[ -z "$VERSION" ]]; then
+    error "Failed to fetch version"
     exit 1
 fi
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_DIR="$PROJECT_ROOT/build"
-BIN_DIR="/usr/local/bin"
-SERVICE_FILE="/etc/systemd/system/harbrixd.service"
-VERSION=$(cat version)
+info "Latest version: v$VERSION"
 
-info "Building harbrix release binaries..."
+CLI_URL="https://github.com/mhs003/harbrix/releases/download/v${VERSION}/harbrix-${ARCH}"
+DAEMON_URL="https://github.com/mhs003/harbrix/releases/download/v${VERSION}/harbrixd-${ARCH}"
 
-go mod tidy
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
 
-mkdir -p "$BUILD_DIR"
-go build -trimpath -ldflags="-s -w -X main.version=$VERSION" -o "$BUILD_DIR/harbrix"  "$PROJECT_ROOT/cmd/harbrix"
-go build -trimpath -ldflags="-s -w" -o "$BUILD_DIR/harbrixd" "$PROJECT_ROOT/cmd/harbrixd"
+info "Downloading binaries..."
+
+curl -fL "$CLI_URL" -o "$TMP_DIR/harbrix"
+curl -fL "$DAEMON_URL" -o "$TMP_DIR/harbrixd"
+
+chmod +x "$TMP_DIR/harbrix" "$TMP_DIR/harbrixd"
 
 info "Installing binaries to $BIN_DIR..."
 
-sudo install -m 755 "$BUILD_DIR/harbrix"  "$BIN_DIR/harbrix"
-sudo install -m 755 "$BUILD_DIR/harbrixd" "$BIN_DIR/harbrixd"
+sudo install -m 755 "$TMP_DIR/harbrix"  "$BIN_DIR/harbrix"
+sudo install -m 755 "$TMP_DIR/harbrixd" "$BIN_DIR/harbrixd"
+
 
 info "Installing systemd service..."
 
