@@ -32,7 +32,7 @@ Services are configured in simple TOML files located in `~/.local/share/harbrix/
 ### System-wide (recommended)
 
 ```bash
-sudo ./install.sh
+./install.sh
 ```
 
 This builds the binaries, installs them to `/usr/local/bin`, sets up the systemd service for `harbrixd`, enables and starts it.
