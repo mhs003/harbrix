@@ -20,7 +20,7 @@ Services are configured in simple TOML files located in `~/.local/share/harbrix/
 - Restart policies: `never`, `on-failure`, `always`
 - Optional stdout/stderr logging
 - Auto-start on boot for enabled services
-- Commands: `list`, `start`, `stop`, `restart`, `status`, `log`, `enable`, `disable`, `new`, `edit`, `delete`, `reload-daemon`
+- Commands: `list`, `start`, `stop`, `restart`, `status`, `log`, `enable`, `disable`, `new`, `edit`, `delete`, `reload`
 
 ## Requirements
 
@@ -101,7 +101,7 @@ harbrix enable myservice          # Auto-start on boot
 harbrix enable myservice --now    # Enable and start now
 harbrix disable myservice
 harbrix delete myservice          # Only if stopped and disabled
-harbrix reload-daemon             # Reload service definitions
+harbrix reload                    # Reload service definitions
 ```
 
 ## Logs
