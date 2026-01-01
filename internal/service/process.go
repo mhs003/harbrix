@@ -49,9 +49,12 @@ func (s *State) Start(paths *paths.Paths) error {
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Credential: &syscall.Credential{
-			Uid: uint32(s.UID),
-			Gid: uint32(s.GID),
+			Uid:         uint32(s.UID),
+			Gid:         uint32(s.GID),
+			Groups:      []uint32{uint32(s.GID)},
+			NoSetGroups: false,
 		},
+		Setpgid: true,
 	}
 
 	if err := cmd.Start(); err != nil {
@@ -75,8 +78,16 @@ func (s *State) Stop() error {
 
 	s.StopReq = true
 
-	if err := s.Cmd.Process.Kill(); err != nil {
-		return err
+	pgid, err := syscall.Getpgid(s.Cmd.Process.Pid)
+	if err != nil {
+		return errors.New(err.Error())
+	}
+
+	if err := syscall.Kill(-pgid, syscall.SIGTERM); err != nil {
+		return errors.New(err.Error())
+	}
+	if err := syscall.Kill(-pgid, syscall.SIGKILL); err != nil {
+		return errors.New(err.Error())
 	}
 
 	s.Cmd = nil

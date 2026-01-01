@@ -111,9 +111,12 @@ func createService(name string) {
 		username = u.Username
 	}
 
-	homedir := os.Getenv("HOME")
-	if homedir == "" {
-		homedir = "/tmp"
+	cwd, err := os.Getwd()
+	if err != nil {
+		cwd := os.Getenv("HOME")
+		if cwd == "" {
+			cwd = "/tmp"
+		}
 	}
 
 	template := fmt.Sprintf(`# %s service
@@ -127,7 +130,7 @@ command=""
 workdir="%s"
 restart="never"
 log=false
-`, name, name, username, homedir)
+`, name, name, username, cwd)
 
 	if err := os.WriteFile(path, []byte(template), 0o644); err != nil {
 		Fatal(err.Error())

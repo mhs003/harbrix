@@ -81,7 +81,7 @@ var commands = []Command{
 		Run:  cli.CmdDelete,
 	},
 	{
-		Name: "reload-daemon",
+		Name: "reload",
 		Desc: "Reload daemon service files",
 		Run:  cli.CmdReloadDaemon,
 	},
