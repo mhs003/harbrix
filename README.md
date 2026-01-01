@@ -22,14 +22,24 @@ Services are configured in simple TOML files located in `~/.local/share/harbrix/
 - Auto-start on boot for enabled services
 - Commands: `list`, `start`, `stop`, `restart`, `status`, `log`, `enable`, `disable`, `new`, `edit`, `delete`, `reload`
 
-## Requirements
+## Dev/Build Requirements
 
 - go >= 1.25.5
 - Linux (?)
 
 ## Installation
 
-### System-wide (recommended)
+
+### Download and Install (recommended)
+
+Run the following command in your shell:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mhs003/harbrix/main/net-install.sh | sudo bash
+```
+This command downloads the latest release binaries for your CPU architecture and installs them on your system.
+
+### Build and Install
 
 ```bash
 ./install.sh
@@ -37,7 +47,9 @@ Services are configured in simple TOML files located in `~/.local/share/harbrix/
 
 This builds the binaries, installs them to `/usr/local/bin`, sets up the systemd service for `harbrixd`, enables and starts it.
 
-### Manual build and install
+---
+
+### Manual build and install *(test mode)*
 
 ```bash
 sudo make install   # build and Install to /usr/local/bin
@@ -49,7 +61,7 @@ The daemon must run as root:
 sudo harbrixd &
 ```
 
-For production, use the provided `install.sh` to manage the systemd service.
+For production, use the provided `install.sh` or `net-install.sh` to manage the systemd service.
 
 ## Uninstallation
 
