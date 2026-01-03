@@ -66,7 +66,7 @@ func (d *Daemon) LoadAllUsers() error {
 		}
 
 		reg := service.NewRegistry()
-		configs, err := service.LoadConfigsFromDisc(p)
+		configs, err := service.LoadConfigsFromDisc(p, service.ModeStart)
 		if err != nil {
 			return err
 		}
@@ -110,7 +110,7 @@ func (d *Daemon) StartAllEnabled() {
 // not used anywhere though.!
 func (d *Daemon) ReloadAllUsers() error {
 	for _, uc := range d.users {
-		configs, err := service.LoadConfigsFromDisc(uc.Paths)
+		configs, err := service.LoadConfigsFromDisc(uc.Paths, service.ModeCLI)
 		if err != nil {
 			return err
 		}
@@ -120,7 +120,7 @@ func (d *Daemon) ReloadAllUsers() error {
 }
 
 func (d *Daemon) ReloadUser(uc *UserContext) error {
-	configs, err := service.LoadConfigsFromDisc(uc.Paths)
+	configs, err := service.LoadConfigsFromDisc(uc.Paths, service.ModeCLI)
 	if err != nil {
 		return err
 	}

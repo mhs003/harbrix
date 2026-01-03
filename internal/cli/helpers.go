@@ -123,13 +123,15 @@ func createService(name string) {
 
 name="%s"
 description=""
-auth="%s"
+author="%s"
 
 [service]
 command=""
 workdir="%s"
-restart="never"
 log=false
+
+[restart]
+policy="never"
 `, name, name, username, cwd)
 
 	if err := os.WriteFile(path, []byte(template), 0o644); err != nil {

@@ -152,6 +152,7 @@ func CmdStatus(args []string) {
 			enabled := s["enabled"].(bool)
 
 			file_path := filepath.Join(p.Services, name+".toml")
+			log_file_path := filepath.Join(p.ServiceLogs, name+".log")
 
 			fmt.Printf("%sDaemon information and status%s\n", bold, reset)
 			fmt.Printf("  %sService:%s %s\n", yellow, reset, name)
@@ -170,6 +171,7 @@ func CmdStatus(args []string) {
 
 			fmt.Printf("  %sStatus:%s %s%s%s\n", yellow, reset, statusColor, status, reset)
 			fmt.Printf("  %sService File:%s %s\n", yellow, reset, file_path)
+			fmt.Printf("  %sLog File:%s %s\n", yellow, reset, log_file_path)
 			break
 		}
 	}

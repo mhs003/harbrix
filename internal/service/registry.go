@@ -4,19 +4,30 @@ import (
 	"errors"
 	"os/exec"
 	"sync"
+	"time"
 )
 
+type LoadMode int
+
 type State struct {
-	Config    *Config
-	Running   bool
-	PID       int
-	Cmd       *exec.Cmd
-	ExitCode  int
-	StopReq   bool // manual stop requested ; used to prevent auto restart on user stop
-	IsEnabled bool
-	UID       int
-	GID       int
+	Config        *Config
+	Running       bool
+	PID           int
+	Cmd           *exec.Cmd
+	ExitCode      int
+	StopReq       bool // manual stop requested ; used to prevent auto restart on user stop
+	IsEnabled     bool
+	UID           int
+	GID           int
+	RestartCount  int
+	FailedCount   int
+	LastStartTime time.Time
 }
+
+const (
+	ModeStart LoadMode = iota
+	ModeCLI
+)
 
 type Registry struct {
 	mu       sync.Mutex

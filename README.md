@@ -89,14 +89,19 @@ service files are simple:
 
 ```toml
 name = "myservice"
-description = "Example service"
-author = "yourusername"
+description = "Example service" # optional
+author = "yourusername"         # optional
 
 [service]
 command = "your-command-here"
-workdir = "/optional/path"
-restart = "always"
-log = true
+workdir = "/optional/path"      # optional; default=~/.local/share/harbrix
+log = true                      # optional; default=false
+
+[restart]
+policy="always" # always, on-failure, never; default=never
+delay="3s"      # optional; default=0s
+limit=5         # optional
+maxfailed=3     # optional; default=5
 ```
 
 ### Common commands
@@ -160,12 +165,11 @@ harbrix log myservice
 
 ## TODO
 
-- [ ] Service restart limitation
-- [ ] Restart delay time
+- [X] Service restart limitation
+- [X] Restart delay time
 - [ ] Environment variables in service files
-- [ ] Better TUI
-
-*this is it, nothing else*
+- [ ] Reimplement CLI in better approach
+- [ ] Better CLI Outputs
 
 ## License
 

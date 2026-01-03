@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"github.com/mhs003/harbrix/internal/paths"
 )
@@ -15,23 +16,15 @@ func (s *State) Start(paths *paths.Paths) error {
 		return errors.New("service already running")
 	}
 
-	if s.Config.Service.Command == "" {
-		return errors.New("service.command cannot be empty")
-	}
-
-	if s.Config.Service.Restart == "" {
-		s.Config.Service.Restart = "never"
-	}
-
-	switch s.Config.Service.Restart {
-	case "never", "on-failure", "always":
-	default:
-		return errors.New("invalid restart policy")
+	if err := s.Config.ValidateConfig(); err != nil {
+		return err
 	}
 
 	cmd := exec.Command("sh", "-c", s.Config.Service.Command)
 	if s.Config.Service.Workdir != "" {
 		cmd.Dir = s.Config.Service.Workdir
+	} else {
+		cmd.Dir = paths.Root
 	}
 
 	if s.Config.Service.Log {
@@ -65,6 +58,7 @@ func (s *State) Start(paths *paths.Paths) error {
 	s.PID = cmd.Process.Pid
 	s.Cmd = cmd
 	s.StopReq = false
+	s.LastStartTime = time.Now()
 
 	go s.wait(paths)
 
@@ -109,18 +103,56 @@ func (s *State) wait(paths *paths.Paths) {
 			exitCode = ee.ExitCode()
 		}
 	}
+
 	s.ExitCode = exitCode
 
 	if s.StopReq {
 		return
 	}
 
-	switch s.Config.Service.Restart {
-	case "always":
-		s.Start(paths)
-	case "on-failure":
-		if exitCode != 0 {
-			s.Start(paths)
-		}
+	if exitCode != 0 {
+		s.FailedCount++
+	} else {
+		s.FailedCount = 0
 	}
+
+	if !s.shouldRestart(exitCode) {
+		return
+	}
+
+	delay, _ := time.ParseDuration(s.Config.Restart.Delay)
+	if delay > 0 {
+		time.Sleep(delay)
+	}
+
+	s.RestartCount++
+	_ = s.Start(paths)
+}
+
+func (s *State) shouldRestart(exitCode int) bool {
+	cfg := s.Config
+
+	switch s.Config.Restart.Policy {
+	case "never":
+		return false
+	case "on-failure":
+		if exitCode == 0 {
+			return false
+		}
+		// case "always":
+	}
+
+	maxFailed := cfg.Restart.MaxFailed
+	if maxFailed != -1 && s.FailedCount > maxFailed-1 {
+		s.FailedCount = 0
+		return false
+	}
+
+	restartLimit := cfg.Restart.Limit
+	if restartLimit > 0 && s.RestartCount >= restartLimit-1 {
+		s.RestartCount = 0
+		return false
+	}
+
+	return true
 }

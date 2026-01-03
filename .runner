@@ -23,4 +23,5 @@ mkduser:
     sudo useradd --system --no-create-home --shell /usr/sbin/nologin harbrix
 
 cpb:
-    sudo cp build/* /usr/local/bin/
+    sudo cp build/harbrix /usr/local/bin/harbrix
+    sudo cp build/harbrixd /usr/local/bin/harbrixd
