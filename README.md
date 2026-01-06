@@ -175,7 +175,7 @@ harbrix log myservice
 
 -   [x] Service restart limitation **(4 Jan, 2026)**
 -   [x] Restart delay time **(4 Jan, 2026)**
--   [X] Environment variables in service files
+-   [X] Environment variables in service files **(6 Jan, 2026)**
 -   [ ] Reimplement CLI in better approach
 -   [ ] Better CLI Outputs
 
