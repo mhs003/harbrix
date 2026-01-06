@@ -94,9 +94,9 @@ name = "myservice"
 description = "Example service" # optional
 author = "yourusername"         # optional
 
-[env]
-PROD = true
-canDie = false
+[env]            # optional
+ENV = "PROD"
+PORT = 8083
 
 [service]
 command = "your-command-here"

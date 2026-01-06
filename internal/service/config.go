@@ -17,7 +17,7 @@ type Config struct {
 	Description string `toml:"description"`
 	Author      string `toml:"author"`
 
-	Env map[string]string `toml:"env"`
+	Env map[string]any `toml:"env"`
 
 	Service struct {
 		Command string `toml:"command"`

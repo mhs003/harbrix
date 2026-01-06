@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -159,10 +160,10 @@ func (s *State) shouldRestart(exitCode int) bool {
 	return true
 }
 
-func (s *State) formatEnv(env map[string]string) []string {
+func (s *State) formatEnv(env map[string]any) []string {
 	out := make([]string, 0, len(env))
 	for k, v := range env {
-		out = append(out, k+"="+v)
+		out = append(out, fmt.Sprintf("%s=%v", k, v))
 	}
 	return out
 }
