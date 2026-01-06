@@ -67,7 +67,9 @@ For production, use the provided `install.sh` or `net-install.sh` to manage the 
 
 ```bash
 sudo ./uninstall.sh
-# or
+```
+or do:
+```bash
 curl -fsSL https://raw.githubusercontent.com/mhs003/harbrix/main/uninstall.sh | sudo bash
 ```
 
