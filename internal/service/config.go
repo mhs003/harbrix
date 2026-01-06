@@ -17,6 +17,8 @@ type Config struct {
 	Description string `toml:"description"`
 	Author      string `toml:"author"`
 
+	Env map[string]string `toml:"env"`
+
 	Service struct {
 		Command string `toml:"command"`
 		Workdir string `toml:"workdir"`
@@ -45,7 +47,7 @@ func ApplyDefaults(c *Config) {
 
 func (c *Config) ValidateConfig() error {
 	if c.Service.Command == "" {
-		return errors.New("service.command cannot be empty")
+		return errors.New("service command cannot be empty")
 	}
 
 	switch c.Restart.Policy {
@@ -54,12 +56,18 @@ func (c *Config) ValidateConfig() error {
 		return errors.New("invalid restart policy")
 	}
 
+	for k := range c.Env {
+		if k == "" {
+			return errors.New("env key cannot be empty")
+		}
+	}
+
 	if _, err := time.ParseDuration(c.Restart.Delay); err != nil {
-		return errors.New("invalid restart.restartdelay")
+		return errors.New("invalid restart.delay")
 	}
 
 	if c.Restart.Limit < 0 {
-		return errors.New("invalid restart.restartlimit")
+		return errors.New("invalid restart.limit")
 	}
 
 	if c.Restart.MaxFailed < -1 {

@@ -8,27 +8,26 @@ Services are configured in simple TOML files located in `~/.local/share/harbrix/
 
 ## Why harbrix
 
-- No need for root privileges to manage personal services.
-- Services run isolated under the owning user's UID/GID.
-- Simpler and lighter than full system supervisors for personal/long-running processes.
-- Supports restart policies and optional logging.
+-   No need for root privileges to manage personal services.
+-   Services run isolated under the owning user's UID/GID.
+-   Simpler and lighter than full system supervisors for personal/long-running processes.
+-   Supports restart policies and optional logging.
 
 ## Features
 
-- Per-user service isolation
-- TOML-based service definitions
-- Restart policies: `never`, `on-failure`, `always`
-- Optional stdout/stderr logging
-- Auto-start on boot for enabled services
-- Commands: `list`, `start`, `stop`, `restart`, `status`, `log`, `enable`, `disable`, `new`, `edit`, `delete`, `reload`
+-   Per-user service isolation
+-   TOML-based service definitions
+-   Restart policies: `never`, `on-failure`, `always`
+-   Optional stdout/stderr logging
+-   Auto-start on boot for enabled services
+-   Commands: `list`, `start`, `stop`, `restart`, `status`, `log`, `enable`, `disable`, `new`, `edit`, `delete`, `reload`
 
 ## Dev/Build Requirements
 
-- go >= 1.25.5
-- Linux (?)
+-   go >= 1.25.5
+-   Linux (?)
 
 ## Installation
-
 
 ### Download and Install (recommended)
 
@@ -37,6 +36,7 @@ Run the following command in your shell:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/mhs003/harbrix/main/net-install.sh | sudo bash
 ```
+
 This command downloads the latest release binaries for your CPU architecture and installs them on your system.
 
 ### Build and Install
@@ -49,7 +49,7 @@ This builds the binaries, installs them to `/usr/local/bin`, sets up the systemd
 
 ---
 
-### Manual build and install *(test mode)*
+### Manual build and install _(test mode)_
 
 ```bash
 sudo make install   # build and Install to /usr/local/bin
@@ -67,6 +67,8 @@ For production, use the provided `install.sh` or `net-install.sh` to manage the 
 
 ```bash
 sudo ./uninstall.sh
+# or
+curl -fsSL https://raw.githubusercontent.com/mhs003/harbrix/main/uninstall.sh | sudo bash
 ```
 
 Removes binaries and the systemd service. User data in `~/.local/share/harbrix` is preserved.
@@ -85,12 +87,16 @@ harbrix new myservice
 harbrix edit myservice
 ```
 
-service files are simple:
+a service file is simple:
 
 ```toml
 name = "myservice"
 description = "Example service" # optional
 author = "yourusername"         # optional
+
+[env]
+PROD = true
+canDie = false
 
 [service]
 command = "your-command-here"
@@ -165,11 +171,11 @@ harbrix log myservice
 
 ## TODO
 
-- [X] Service restart limitation
-- [X] Restart delay time
-- [ ] Environment variables in service files
-- [ ] Reimplement CLI in better approach
-- [ ] Better CLI Outputs
+-   [x] Service restart limitation **(4 Jan, 2026)**
+-   [x] Restart delay time **(4 Jan, 2026)**
+-   [ ] Environment variables in service files
+-   [ ] Reimplement CLI in better approach
+-   [ ] Better CLI Outputs
 
 ## License
 

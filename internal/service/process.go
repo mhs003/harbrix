@@ -27,6 +27,8 @@ func (s *State) Start(paths *paths.Paths) error {
 		cmd.Dir = paths.Root
 	}
 
+	cmd.Env = append(os.Environ(), s.formatEnv(s.Config.Env)...)
+
 	if s.Config.Service.Log {
 		logFile := filepath.Join(paths.ServiceLogs, s.Config.Name+".log")
 		f, err := os.OpenFile(logFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
@@ -155,4 +157,12 @@ func (s *State) shouldRestart(exitCode int) bool {
 	}
 
 	return true
+}
+
+func (s *State) formatEnv(env map[string]string) []string {
+	out := make([]string, 0, len(env))
+	for k, v := range env {
+		out = append(out, k+"="+v)
+	}
+	return out
 }
